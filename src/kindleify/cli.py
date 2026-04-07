@@ -1,3 +1,6 @@
+# Copyright (c) 2026 Kindleify
+# MIT License - see LICENSE file
+
 import click
 
 from kindleify import config as cfg

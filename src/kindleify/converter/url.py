@@ -1,3 +1,6 @@
+# Copyright (c) 2026 Kindleify
+# MIT License - see LICENSE file
+
 import trafilatura
 from trafilatura.metadata import extract_metadata
 

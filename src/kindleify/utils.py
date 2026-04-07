@@ -1,4 +1,8 @@
+# Copyright (c) 2026 Kindleify
+# MIT License - see LICENSE file
+
 import re
+
 
 def text_to_html(text: str) -> str:
     """
@@ -7,6 +11,7 @@ def text_to_html(text: str) -> str:
     paragraphs = text.split("\n\n")
     html = "".join(f"<p>{p.strip()}</p>" for p in paragraphs if p.strip())
     return html
+
 
 def sanitize_filename(name: str) -> str:
     """
