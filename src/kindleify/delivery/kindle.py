@@ -1,16 +1,29 @@
 import smtplib
 from email.message import EmailMessage
 
+from kindleify import config as cfg
+
 
 def send_to_kindle(
     file_path: str,
-    to_email: str,
-    from_email: str,
-    app_password: str
+    to_email: str | None = None,
+    from_email: str | None = None,
+    app_password: str | None = None,
 ):
     """
     Send EPUB file to Kindle via email.
+    Uses stored credentials if not provided as arguments.
     """
+    stored = cfg.get_kindle_config()
+
+    to_email = to_email or stored.get("to_email")
+    from_email = from_email or stored.get("from_email")
+    app_password = app_password or stored.get("password")
+
+    if not to_email:
+        raise ValueError("Kindle email not configured. Run: kindleify config")
+    if not from_email or not app_password:
+        raise ValueError("Sender credentials not configured. Run: kindleify config")
 
     msg = EmailMessage()
     msg["Subject"] = "Kindleify Book"
@@ -21,10 +34,7 @@ def send_to_kindle(
 
     with open(file_path, "rb") as f:
         msg.add_attachment(
-            f.read(),
-            maintype="application",
-            subtype="epub+zip",
-            filename="book.epub"
+            f.read(), maintype="application", subtype="epub+zip", filename="book.epub"
         )
 
     with smtplib.SMTP_SSL("smtp.gmail.com", 465) as smtp:
