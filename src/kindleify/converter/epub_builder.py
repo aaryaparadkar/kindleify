@@ -1,5 +1,6 @@
 from ebooklib import epub
 
+
 class EpubBuilder:
     def __init__(self, title: str):
         self.book = epub.EpubBook()
@@ -9,20 +10,24 @@ class EpubBuilder:
         self.chapters = []
 
     def add_chapter(self, title: str, content: str):
-        chapter = epub.EpubHtml(
-            title=title,
-            file_name=f"{title}.xhtml",
-            lang="en"
-        )
+        chapter = epub.EpubHtml(title=title, file_name=f"{title}.xhtml", lang="en")
         chapter.content = content
 
         self.book.add_item(chapter)
         self.chapters.append(chapter)
 
     def build(self, output_path: str):
+        # Create nav first
+        nav = epub.EpubNav(file_name="nav.xhtml", lang="en")
+        self.book.add_item(nav)
+
+        # Set TOC
         self.book.toc = tuple(self.chapters)
 
+        # Set spine - reading order (nav first, then chapters)
+        self.book.spine = [nav] + self.chapters
+
+        # Add NCX for backward compatibility
         self.book.add_item(epub.EpubNcx())
-        self.book.add_item(epub.EpubNav())
 
         epub.write_epub(output_path, self.book)
