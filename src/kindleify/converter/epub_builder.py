@@ -11,14 +11,14 @@ class EpubBuilder:
 
     def add_chapter(self, title: str, content: str):
         chapter = epub.EpubHtml(title=title, file_name=f"{title}.xhtml", lang="en")
-        chapter.content = content
+        chapter.set_content(content)
 
         self.book.add_item(chapter)
         self.chapters.append(chapter)
 
     def build(self, output_path: str):
         # Create nav first
-        nav = epub.EpubNav(file_name="nav.xhtml", lang="en")
+        nav = epub.EpubNav(file_name="nav.xhtml")
         self.book.add_item(nav)
 
         # Set TOC

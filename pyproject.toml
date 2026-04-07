@@ -11,7 +11,7 @@ requires-python = ">=3.14"
 dependencies = [
     "click>=8.3.2",
     "ebooklib>=0.20",
-    "pdf2epub",
+    "pypdf>=4.0.0",
     "pillow>=12.0.0",
     "requests",
     "trafilatura",
