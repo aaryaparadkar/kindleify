@@ -5,22 +5,29 @@ import trafilatura
 from trafilatura.metadata import extract_metadata
 
 from kindleify.converter.epub_builder import EpubBuilder
+from kindleify.converter.language import detect_language
 from kindleify.utils import sanitize_filename
 
 
-def url_to_epub(url: str, output_path: str | None = None) -> str:
+def url_to_epub(url: str, output_path: str | None = None, language: str = "auto") -> str:
     """
     Convert a URL into an EPUB file.
     Returns the output file path.
+    If language is 'auto', detect from extracted text.
     """
 
     downloaded = trafilatura.fetch_url(url)
     if not downloaded:
         raise ValueError("Failed to fetch URL content")
 
-    text = trafilatura.extract(downloaded, output_format="html", include_comments=False)
+    text = trafilatura.extract(downloaded, output_format="xml", include_comments=False)
     if not text:
         raise ValueError("Failed to extract readable content")
+
+    text_plain = trafilatura.extract(downloaded, output_format="txt", include_comments=False) or ""
+
+    if language == "auto":
+        language = detect_language(text_plain)
 
     body_content = (
         text.replace("<html>", "")
@@ -51,7 +58,7 @@ def url_to_epub(url: str, output_path: str | None = None) -> str:
         filename = sanitize_filename(title) or "book"
         output_path = f"{filename}.epub"
 
-    builder = EpubBuilder(title)
+    builder = EpubBuilder(title, language=language)
     builder.add_chapter("Content", html_content)
     builder.build(output_path)
 

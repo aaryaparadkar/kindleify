@@ -5,15 +5,16 @@ from ebooklib import epub
 
 
 class EpubBuilder:
-    def __init__(self, title: str):
+    def __init__(self, title: str, language: str = "en"):
         self.book = epub.EpubBook()
         self.book.set_identifier("kindleify")
         self.book.set_title(title)
-        self.book.set_language("en")
+        self.book.set_language(language)
         self.chapters = []
+        self.language = language
 
     def add_chapter(self, title: str, content: str):
-        chapter = epub.EpubHtml(title=title, file_name=f"{title}.xhtml", lang="en")
+        chapter = epub.EpubHtml(title=title, file_name=f"{title}.xhtml", lang=self.language)
         chapter.set_content(content)
 
         self.book.add_item(chapter)

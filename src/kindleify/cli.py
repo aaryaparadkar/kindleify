@@ -6,7 +6,8 @@ import click
 from kindleify import config as cfg
 from kindleify.converter.url import url_to_epub
 from kindleify.converter.pdf import pdf_to_epub
-from kindleify.delivery.kindle import send_to_kindle
+from kindleify.converter.batch import batch_pdfs, batch_urls
+from kindleify.delivery.kindle import send_to_kindle, send_batch_to_kindle
 
 
 @click.group()
@@ -18,18 +19,20 @@ def cli():
 @cli.command()
 @click.argument("url")
 @click.option("-o", "--output", default=None, help="Output EPUB file")
-def url(url, output):
+@click.option("-l", "--language", default="auto", help="Language code (auto-detect if not specified)")
+def url(url, output, language):
     """Convert URL to EPUB"""
-    path = url_to_epub(url, output)
+    path = url_to_epub(url, output, language)
     click.echo(f"Saved EPUB: {path}")
 
 
 @cli.command()
 @click.argument("pdf_path")
 @click.option("-o", "--output", default="output.epub", help="Output EPUB file")
-def pdf(pdf_path, output):
+@click.option("-l", "--language", default="auto", help="Language code (auto-detect if not specified)")
+def pdf(pdf_path, output, language):
     """Convert PDF to EPUB"""
-    pdf_to_epub(pdf_path, output)
+    pdf_to_epub(pdf_path, output, language)
     click.echo(f"Saved EPUB: {output}")
 
 
@@ -97,3 +100,39 @@ def config_clear():
         click.echo("Configuration cleared.")
     else:
         click.echo("Cancelled.")
+
+
+@cli.group()
+def batch():
+    """Batch convert multiple files"""
+    pass
+
+
+@batch.command("pdfs")
+@click.argument("directory")
+@click.option("-o", "--output", default="kindleify-output", help="Output directory")
+@click.option("-l", "--language", default="auto", help="Language code (auto-detect if not specified)")
+@click.option("--send", is_flag=True, help="Send all converted files to Kindle")
+def batch_pdfs_cmd(directory, output, language, send):
+    """Convert all PDFs in a directory recursively"""
+    files = batch_pdfs(directory, output, language)
+    click.echo(f"Converted {len(files)} PDFs to {output}/")
+
+    if send and files:
+        send_batch_to_kindle(files)
+        click.echo(f"Sent {len(files)} files to Kindle")
+
+
+@batch.command("urls")
+@click.argument("file")
+@click.option("-o", "--output", default="kindleify-output", help="Output directory")
+@click.option("-l", "--language", default="auto", help="Language code (auto-detect if not specified)")
+@click.option("--send", is_flag=True, help="Send all converted files to Kindle")
+def batch_urls_cmd(file, output, language, send):
+    """Convert URLs from a text file (one per line)"""
+    files = batch_urls(file, output, language)
+    click.echo(f"Converted {len(files)} URLs to {output}/")
+
+    if send and files:
+        send_batch_to_kindle(files)
+        click.echo(f"Sent {len(files)} files to Kindle")
